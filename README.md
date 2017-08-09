@@ -4,4 +4,5 @@
 
 Command line offline tools for moving coins.
 
-Still under development; not reccomended for use with real money.
+Still under development; not recomended for use with real money.
+

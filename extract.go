@@ -6,6 +6,7 @@ import (
 
 	"github.com/adiabat/btcd/wire"
 	"github.com/adiabat/btcutil"
+	"github.com/adiabat/goodelivery/extract"
 	"github.com/mit-dci/lit/portxo"
 )
 
@@ -47,10 +48,17 @@ func (g *GDsession) insert() error {
 }
 
 // extract takes in a hex-encoded transaction, and returns a portxo
+// or if it's a listunspent, try that.
 func (g *GDsession) extract() error {
 	if *g.inFileName == "" {
 		return fmt.Errorf("extract needs input file (-in)")
 	}
+
+	filetext, err := g.inputText()
+	if err != nil {
+		return err
+	}
+	return extract.ParseBitcoindListUnspent(filetext)
 
 	tx := wire.NewMsgTx()
 	u := new(portxo.PorTxo)

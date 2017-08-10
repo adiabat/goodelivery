@@ -1,15 +1,20 @@
 package extract
 
 import (
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"strconv"
 	"strings"
 
+	"github.com/adiabat/btcd/chaincfg/chainhash"
+	"github.com/adiabat/btcutil"
 	"github.com/mit-dci/lit/portxo"
 )
 
-func ParseBitcoindListUnspent(s string) error {
+// ParseBitcoindListUnspent parses the text from bitcoin-cli listunspend
+// and returns a slice of portxos
+func ParseBitcoindListUnspent(s string) ([]portxo.PorTxo, error) {
 	fmt.Printf("input string is %d chars\n", len(s))
 
 	utxos := new([]UnspentBitcoind)
@@ -19,35 +24,83 @@ func ParseBitcoindListUnspent(s string) error {
 
 	err := d.Decode(utxos)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	if len(*utxos) == 0 {
-		return fmt.Errorf("no utxos \n")
+		return nil, fmt.Errorf("no utxos \n")
 	}
 
 	fmt.Printf("Got %d utxos\n", len(*utxos))
 
-	var sum int64
-	//	var fsum float64
+	var ptxs []portxo.PorTxo
+
 	for _, u := range *utxos {
-		p := new(portxo.PorTxo)
-
-		if u.Spendable {
-			amt, err := String2Sat(string(u.Amount))
-			if err != nil {
-				return err
-			}
-			sum += amt
-			//			fsum += u.Amount
+		p, err := ExtractFromJson(u)
+		if err != nil {
+			return nil, err
 		}
-		if !u.Spendable {
-			fmt.Printf("unspendable ")
-		}
-
+		ptxs = append(ptxs, *p)
 	}
-	fmt.Printf("total coin is %d\n", sum)
-	return nil
+	return ptxs, nil
+}
+
+// ExtractFromJson makes a single portxo from a json struct from
+// listunspent
+func ExtractFromJson(u UnspentBitcoind) (*portxo.PorTxo, error) {
+	p := new(portxo.PorTxo)
+	txid, err := chainhash.NewHashFromStr(u.Txid)
+	if err != nil {
+		return nil, err
+	}
+	p.Op.Hash = *txid
+	p.Op.Index = u.Vout
+
+	p.Value, err = String2Sat(string(u.Amount))
+
+	// check if mode can be determined from the pkscript
+	pks, err := hex.DecodeString(u.ScriptPubKey)
+	if err != nil {
+		return nil, err
+	}
+
+	p.Mode = portxo.TxoModeFromPkScript(pks)
+
+	p.PkScript = pks
+	if err != nil {
+		return nil, err
+	}
+
+	//p.AddWIF()
+	return p, nil
+}
+
+// ParseBitcoindWIFDump takes the file bitcoin-cli dumpwallet makes,
+// and returns a slice of WIFs
+func ParseBitcoindWIFDump(s string) ([]*btcutil.WIF, error) {
+	fmt.Printf("input string is %d chars\n", len(s))
+
+	lines := strings.Split(s, "\n")
+	var wifstrings []string
+	for _, line := range lines {
+		words := strings.Split(line, " ")
+
+		if len(words[0]) > 1 && words[0][0] == 'c' {
+			wifstrings = append(wifstrings, words[0])
+		}
+	}
+
+	var wifs []*btcutil.WIF
+
+	for _, x := range wifstrings {
+		wif, err := btcutil.DecodeWIF(x)
+		if err != nil {
+			return nil, err
+		}
+		wifs = append(wifs, wif)
+	}
+
+	return wifs, nil
 }
 
 // UnspentBitcoind is the JSON struct for what bitcoind gives you from a

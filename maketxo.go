@@ -5,51 +5,11 @@ import (
 	"fmt"
 
 	"github.com/adiabat/btcd/wire"
-	"github.com/adiabat/btcutil"
 	"github.com/adiabat/goodelivery/extract"
 	"github.com/mit-dci/lit/portxo"
 )
 
-// insert puts a private key into a portxo
-func (g *GDsession) insert() error {
-	if *g.inFileName == "" {
-		return fmt.Errorf("insert needs input file (-in)")
-	}
-	if *g.wifkey == "" {
-		return fmt.Errorf("insert needs wif key (-wif, -wiffile)")
-	}
-
-	fileslice, err := g.inputHex()
-	if err != nil {
-		return err
-	}
-
-	u, err := portxo.PorTxoFromBytes(fileslice)
-	if err != nil {
-		fmt.Errorf("file wasn't a tx, and wasn't a utxo! %s\n", err.Error())
-	}
-
-	// try to add WIF
-	wif, err := btcutil.DecodeWIF(*g.wifkey)
-	if err != nil {
-		return err
-	}
-	err = u.AddWIF(*wif)
-	if err != nil {
-		return err
-	}
-	if *g.verbose {
-		fmt.Printf("%s\n", u.String())
-	}
-	b, _ := u.Bytes()
-	outString := fmt.Sprintf("%x", b)
-
-	return g.output(outString)
-}
-
-// extract takes in a hex-encoded transaction, and returns a portxo
-// or if it's a listunspent, try that.
-func (g *GDsession) extract() error {
+func (g *GDsession) extractmany() error {
 	if *g.inFileName == "" {
 		return fmt.Errorf("extract needs input file (-in)")
 	}
@@ -58,7 +18,32 @@ func (g *GDsession) extract() error {
 	if err != nil {
 		return err
 	}
-	return extract.ParseBitcoindListUnspent(filetext)
+
+	ptxos, err := extract.ParseBitcoindListUnspent(filetext)
+	if err != nil {
+		return err
+	}
+
+	var outstring string
+
+	// go through each portxo, convert to bytes, then hex, then make a line
+	for _, p := range ptxos {
+		b, err := p.Bytes()
+		if err != nil {
+			return err
+		}
+		outstring += fmt.Sprintf("%x\n", b)
+	}
+
+	return g.output(outstring)
+}
+
+// extract takes in a hex-encoded transaction, and returns a portxo.
+// or if it's a listunspent, then make a bunch of portxos
+func (g *GDsession) extractfromtx() error {
+	if *g.inFileName == "" {
+		return fmt.Errorf("extract needs input file (-in)")
+	}
 
 	tx := wire.NewMsgTx()
 	u := new(portxo.PorTxo)

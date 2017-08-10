@@ -58,7 +58,7 @@ commands:
 
 func usage() {
 	fmt.Printf("Usage:\n./goodelivery command -options\n")
-	fmt.Printf("commands: new adr key dec enc extract insert move\n")
+	fmt.Printf("commands: new adr key dec enc extract extractmany insert move\n")
 	//	fmt.Printf("or ./goodelivery BIP38 privkey\n")
 }
 
@@ -218,11 +218,18 @@ func (g *GDsession) Run() error {
 	case "key":
 		err = g.decode39(true)
 	case "extract":
-		err = g.extract()
+		err = g.extractfromtx()
+	case "extractmany":
+		err = g.extractmany()
 	case "insert":
 		err = g.insert()
+	case "insertmany":
+		err = g.insertmany()
 	case "move":
 		err = g.move()
+		//	case "movemany":
+		//		err = g.movemany()
+
 	default:
 		usage()
 	}

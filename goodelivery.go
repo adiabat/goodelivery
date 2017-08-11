@@ -58,7 +58,8 @@ commands:
 
 func usage() {
 	fmt.Printf("Usage:\n./goodelivery command -options\n")
-	fmt.Printf("commands: new adr key dec enc extract extractmany insert move\n")
+	fmt.Printf(
+		"commands: new adr key dec enc extract extractmany insert insertmany move\n")
 	//	fmt.Printf("or ./goodelivery BIP38 privkey\n")
 }
 
@@ -92,6 +93,7 @@ type GDsession struct {
 
 	bip44   *bool // bip44 derivation paths (defaults to core's m/0'/0'/k')
 	mainArg *bool // flag to set mainnet
+	bchArg  *bool // flag to set BCHnet
 
 	// defaults to testnet, not mainnet.  not reccommended for mainnet yet.
 	NetParams *chaincfg.Params
@@ -124,6 +126,7 @@ func (g *GDsession) setFlags(fset *flag.FlagSet) {
 	g.verbose = fset.Bool("v", false, "verbose mode")
 
 	g.mainArg = fset.Bool("main", true, "use mainnet (not testnet3)")
+	g.bchArg = fset.Bool("bch", true, "use bch network")
 	g.bip44 = fset.Bool("b44", false, "use bip44 key derivation (default m/0'/0'/k')")
 
 }
@@ -172,7 +175,7 @@ func (g *GDsession) inputText() (string, error) {
 func (g *GDsession) LoadFiles() error {
 
 	// set network (can't do this in setFlags, needs to be after Parse() )
-	if *g.mainArg {
+	if *g.mainArg || *g.bchArg {
 		g.NetParams = &chaincfg.MainNetParams
 	} else {
 		g.NetParams = &chaincfg.TestNet3Params

@@ -85,7 +85,7 @@ func ParseBitcoindWIFDump(s string) ([]*btcutil.WIF, error) {
 	for _, line := range lines {
 		words := strings.Split(line, " ")
 
-		if len(words[0]) > 1 && words[0][0] == 'c' {
+		if len(words[0]) > 30 { // && words[0][0] == 'c'
 			wifstrings = append(wifstrings, words[0])
 		}
 	}
@@ -95,9 +95,11 @@ func ParseBitcoindWIFDump(s string) ([]*btcutil.WIF, error) {
 	for _, x := range wifstrings {
 		wif, err := btcutil.DecodeWIF(x)
 		if err != nil {
-			return nil, err
+			fmt.Printf("can't decode %s as a wif\n")
+			// return nil, err
+		} else {
+			wifs = append(wifs, wif)
 		}
-		wifs = append(wifs, wif)
 	}
 
 	return wifs, nil

@@ -35,7 +35,7 @@ func (g *GDsession) move() error {
 		return err
 	}
 
-	tx, err := SendOne(*txo, adr, *g.fee, g.NetParams)
+	tx, err := SendOne(*txo, adr, *g.fee, g.NetParams, *g.bchArg)
 	if err != nil {
 		return err
 	}
@@ -53,7 +53,7 @@ func (g *GDsession) move() error {
 
 // SendOne moves one utxo to a new address, returning the transaction
 func SendOne(u portxo.PorTxo, adr btcutil.Address,
-	feeRate int64, param *chaincfg.Params) (*wire.MsgTx, error) {
+	feeRate int64, param *chaincfg.Params, bch bool) (*wire.MsgTx, error) {
 
 	// estimate tx size at 200 bytes
 	fee := 200 * feeRate
@@ -98,7 +98,7 @@ func SendOne(u portxo.PorTxo, adr btcutil.Address,
 	}
 
 	// check if BCH sigs needed
-	if true {
+	if bch {
 		// make hash cache for this tx
 		hCache := txscript.NewTxSigHashes(tx)
 

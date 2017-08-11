@@ -1,7 +1,10 @@
 package main
 
 import (
+	"bytes"
+	"encoding/hex"
 	"fmt"
+	"strings"
 
 	"github.com/adiabat/btcutil"
 	"github.com/adiabat/goodelivery/extract"
@@ -24,7 +27,7 @@ func (g *GDsession) insert() error {
 
 	u, err := portxo.PorTxoFromBytes(fileslice)
 	if err != nil {
-		fmt.Errorf("file wasn't a tx, and wasn't a utxo! %s\n", err.Error())
+		return fmt.Errorf("file wasn't a tx, and wasn't a utxo! %s\n", err.Error())
 	}
 
 	// try to add WIF
@@ -51,10 +54,10 @@ func (g *GDsession) insertmany() error {
 		return fmt.Errorf("insertmany needs wif file (-wiffile)")
 	}
 
-	//	filestring, err := g.inputText()
-	//	if err != nil {
-	//		return err
-	//	}
+	filestring, err := g.inputText()
+	if err != nil {
+		return err
+	}
 
 	// get wifs from input file
 	wifs, err := extract.ParseBitcoindWIFDump(*g.wifkey)
@@ -62,10 +65,75 @@ func (g *GDsession) insertmany() error {
 		return err
 	}
 
-	var outString string
-	for _, w := range wifs {
-		outString += fmt.Sprintf("pub %x\n", w.SerializePubKey())
+	var ptxos []*portxo.PorTxo
+
+	// got all the wifs; now get all the un-keyed utxos
+	lines := strings.Split(filestring, "\n")
+	for _, l := range lines {
+		// ascii hex to bytes
+		b, err := hex.DecodeString(l)
+		if err != nil {
+			return err
+		}
+
+		u, err := portxo.PorTxoFromBytes(b)
+		if err != nil {
+			return fmt.Errorf("bad portxo %s\n", err.Error())
+		}
+		ptxos = append(ptxos, u)
 	}
 
-	return g.output(outString)
+	// now have all the wifs and all the portxos.  Need to match them
+
+	// The naive way is O(n^2)-ish which is bad but fast enough for the small
+	// numbers here.  If you need to do this with millions of utxos & keys, well,
+	// write something more efficient.
+	var hits int
+	for i, txo := range ptxos {
+		// need i to modify the portxo in place.  Probably
+		for _, wif := range wifs {
+
+			// match detection: is this wif the right private key for this utxo?
+			var match bool
+			if txo.Mode == portxo.TxoP2PKComp && wif.CompressPubKey {
+				// TODO match raw pubkey
+			}
+			if txo.Mode == portxo.TxoP2PKHUncomp && !wif.CompressPubKey {
+				// TODO match uncompressed PKH
+			}
+			if txo.Mode == portxo.TxoP2PKHComp && wif.CompressPubKey {
+				pkh := btcutil.Hash160(wif.SerializePubKey())
+				if bytes.Equal(txo.PkScript[3:23], pkh) {
+					match = true
+				}
+			}
+
+			if match {
+				err = ptxos[i].AddWIF(*wif)
+				if err != nil {
+					return err
+				}
+				if *g.verbose {
+					fmt.Printf("inserted to utxo %d %s\n", i, ptxos[i].String())
+				}
+				hits++
+				// stop looking for a wif to insert
+				break
+			}
+		}
+	}
+
+	fmt.Printf("added keys to %d of %d utxos\n", hits, len(ptxos))
+
+	var outstring string
+	// go through each portxo, convert to bytes, then hex, then make a line
+	for _, p := range ptxos {
+		b, err := p.Bytes()
+		if err != nil {
+			return err
+		}
+		outstring += fmt.Sprintf("%x\n", b)
+	}
+
+	return g.output(outstring)
 }

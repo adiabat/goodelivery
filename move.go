@@ -71,7 +71,7 @@ func SendOne(u portxo.PorTxo, adr btcutil.Address,
 	tx.AddTxIn(wire.NewTxIn(&u.Op, nil, nil))
 	//	tx.AddTxIn(wire.NewTxIn(&u.Op, nil))
 
-	var sig []byte
+	var sigScript []byte
 	var empty [32]byte
 	//	var wit [][]byte
 
@@ -96,15 +96,29 @@ func SendOne(u portxo.PorTxo, adr btcutil.Address,
 	if err != nil {
 		return nil, err
 	}
-	sig, err = txscript.SignatureScript(
-		tx, 0, prevScript, txscript.SigHashAll, priv, true)
-	if err != nil {
-		return nil, err
+
+	// check if BCH sigs needed
+	if true {
+		// make hash cache for this tx
+		hCache := txscript.NewTxSigHashes(tx)
+
+		// generate sig.
+		sigScript, err = txscript.BCHSignatureScript(
+			tx, hCache, 0, u.Value, u.PkScript, priv, true)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		sigScript, err = txscript.SignatureScript(
+			tx, 0, prevScript, txscript.SigHashAll, priv, true)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	// swap sigs into sigScripts in txins
-	if sig != nil {
-		tx.TxIn[0].SignatureScript = sig
+	if sigScript != nil {
+		tx.TxIn[0].SignatureScript = sigScript
 	}
 	//	if wit != nil {
 	//		tx.TxIn[0].Witness = wit

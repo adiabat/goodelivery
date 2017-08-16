@@ -21,7 +21,6 @@ usage is ./goodelivery command -options
 Make a new BIP39 seed phrase.
 
 options: 
-* -b bitlength : Specify the bitlength of the mnemonic seed to use.  The default is 128 bit, which results in a phrase of 12 words.  More bits gives more words.  Options are 128, 160, 192, 224, or 256.
 
 example: 
 ```
@@ -87,33 +86,33 @@ Create a 1-input, 1-output transaction which spends the utxo specified by -in, a
 
 ## options
 
-* -in <filename> input file name
+`-in <filename>` input file name
 
-* -out <filename> output file name
+`-out <filename>` output file name
 
-* -wiffile <filename> input file with WIF private keys
+`-wiffile <filename>` input file with WIF private keys
 
-* -wifkey <wif>  use the WIF key from the command line
+`-wifkey <wif>`  use the WIF key from the command line
 
-* -dest <base58> send to this base58 encoded address
+`-dest <base58>` send to this base58 encoded address
 
-* -pass <string> use this password / salt from the command line
+`-pass <string>` use this password / salt from the command line
 
-* -b <int> specify the bitlength of the mnemonic seed to use.  The default is 128 bit, which results in a phrase of 12 words.  More bits gives more words.  Options are 128, 160, 192, 224, or 256. 
+`-b <int>` specify the bitlength of the mnemonic seed to use.  The default is 128 bit, which results in a phrase of 12 words.  More bits gives more words.  Options are 128, 160, 192, 224, or 256. 
 
-* -index <int> when extracting a utxo from a raw transaction, pull out this index
+`-index <int>` when extracting a utxo from a raw transaction, pull out this index
 
-* -fee <int> when sending, use this fee rate (in satoshis per byte)
+`-fee <int>` when sending, use this fee rate (in satoshis per byte)
 
-* -echo when typing in a password, show it on the terminal
+`-echo` when typing in a password, show it on the terminal
 
-* -star when typing in a password, show **** on the terminal
+`-star` when typing in a password, show **** on the terminal
 
-* -v be verbose and print a bunch of stuff on the terminal.  Does not affect -out
+`-v` be verbose and print a bunch of stuff on the terminal.  Does not affect -out
 
-* -main use mainnet instead of testnet3
+`-main` use mainnet instead of testnet3
 
-* -bch use BCH network and signature algo
+`-bch` use BCH network and signature algo
 
-* -b44 use the bip44 path for key derivation, instead of the bitcoin core's keypath
+`-b44` use the bip44 path for key derivation, instead of the bitcoin core's keypath
 

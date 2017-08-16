@@ -125,8 +125,8 @@ func (g *GDsession) setFlags(fset *flag.FlagSet) {
 	g.star = fset.Bool("star", false, "echo text entry as ****")
 	g.verbose = fset.Bool("v", false, "verbose mode")
 
-	g.mainArg = fset.Bool("main", true, "use mainnet (not testnet3)")
-	g.bchArg = fset.Bool("bch", true, "use bch network")
+	g.mainArg = fset.Bool("main", false, "use mainnet (not testnet3)")
+	g.bchArg = fset.Bool("bch", false, "use bch network")
 	g.bip44 = fset.Bool("b44", false, "use bip44 key derivation (default m/0'/0'/k')")
 
 }

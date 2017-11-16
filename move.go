@@ -35,7 +35,7 @@ func (g *GDsession) move() error {
 		return err
 	}
 
-	tx, err := SendOne(*txo, adr, *g.fee, g.NetParams, *g.bchArg)
+	tx, err := SendOne(*txo, adr, *g.fee, g.NetParams)
 	if err != nil {
 		return err
 	}
@@ -53,7 +53,7 @@ func (g *GDsession) move() error {
 
 // SendOne moves one utxo to a new address, returning the transaction
 func SendOne(u portxo.PorTxo, adr btcutil.Address,
-	feeRate int64, param *chaincfg.Params, bch bool) (*wire.MsgTx, error) {
+	feeRate int64, param *chaincfg.Params) (*wire.MsgTx, error) {
 
 	// estimate tx size at 200 bytes
 	fee := 200 * feeRate
@@ -97,14 +97,24 @@ func SendOne(u portxo.PorTxo, adr btcutil.Address,
 		return nil, err
 	}
 
-	// check if BCH sigs needed
-	if bch {
+	// check if BCH / BTG sigs needed
+	if param.Name == "bch" || param.Name == "btg" {
+
 		// make hash cache for this tx
 		hCache := txscript.NewTxSigHashes(tx)
 
+		// sighash type is sighashAll, but also has the "forkID" bit set
+		hashType := txscript.SigHashAll | txscript.SigHashForkID
+
+		// also put more than the forkID; top 3 bytes can hold different
+		// forkID bits which make the sighash different for different
+		// altcoins
+		// Both sides are just uint32s but gotta cast
+		hashType |= txscript.SigHashType(param.ForkID << 8)
+
 		// generate sig.
 		sigScript, err = txscript.BCHSignatureScript(
-			tx, hCache, 0, u.Value, u.PkScript, priv, true)
+			tx, hCache, 0, u.Value, u.PkScript, hashType, priv, true)
 		if err != nil {
 			return nil, err
 		}

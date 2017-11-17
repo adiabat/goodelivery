@@ -91,7 +91,9 @@ type GDsession struct {
 	star    *bool // echo ****s to screen? default false
 	verbose *bool // say more stuff. default false
 
-	bip44   *bool // bip44 derivation paths (defaults to core's m/0'/0'/k')
+	bip44      *bool // bip44 derivation paths (defaults to core's m/0'/0'/k')
+	changePath *bool // use change addresses in derivation path
+
 	mainArg *bool // flag to set mainnet
 	bchArg  *bool // flag to set BCHnet
 
@@ -128,6 +130,7 @@ func (g *GDsession) setFlags(fset *flag.FlagSet) {
 	g.mainArg = fset.Bool("main", true, "use mainnet (not testnet3)")
 	g.bchArg = fset.Bool("bch", true, "use bch network")
 	g.bip44 = fset.Bool("b44", false, "use bip44 key derivation (default m/0'/0'/k')")
+	g.changePath = fset.Bool("change", false, "make change addresses/keys for bip44")
 
 }
 
@@ -160,10 +163,21 @@ func (g *GDsession) output(s string) error {
 	return nil
 }
 
-// returns the input file as a dehexlified byte slice
-func (g *GDsession) inputHex() ([]byte, error) {
-	// convert to bytes & return
-	return hex.DecodeString(g.inFile)
+// returns the input file as a dehexlified byte slices (1 per line)
+func (g *GDsession) inputHex() [][]byte {
+	var slices [][]byte
+
+	lines := strings.Split(g.inFile, "\n")
+	for _, line := range lines {
+		slice, err := hex.DecodeString(line)
+		if err != nil {
+			//	skip it
+		} else {
+			slices = append(slices, slice)
+		}
+	}
+
+	return slices
 }
 
 // returns the input file as a trimmed string

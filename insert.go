@@ -20,12 +20,12 @@ func (g *GDsession) insert() error {
 		return fmt.Errorf("insert needs wif key (-wif, -wiffile)")
 	}
 
-	fileslice, err := g.inputHex()
-	if err != nil {
-		return err
+	fileslice := g.inputHex()
+	if len(fileslice) == 0 {
+		return fmt.Errorf("no valid hex in input file")
 	}
 
-	u, err := portxo.PorTxoFromBytes(fileslice)
+	u, err := portxo.PorTxoFromBytes(fileslice[0])
 	if err != nil {
 		return fmt.Errorf("file wasn't a tx, and wasn't a utxo! %s\n", err.Error())
 	}

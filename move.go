@@ -20,12 +20,12 @@ func (g *GDsession) move() error {
 		return fmt.Errorf("move requires a destination address (-dest)")
 	}
 
-	portxBytes, err := g.inputHex()
-	if err != nil {
-		return err
+	portxBytes := g.inputHex()
+	if len(portxBytes) == 0 {
+		return fmt.Errorf("no hex in input file")
 	}
 
-	txo, err := portxo.PorTxoFromBytes(portxBytes)
+	txo, err := portxo.PorTxoFromBytes(portxBytes[0])
 	if err != nil {
 		return err
 	}

@@ -146,7 +146,14 @@ func (g *GDsession) PrintHDKeys(
 		}
 
 		k.Step[2] = 0 | hard
+
 		k.Step[3] = 0
+		if *g.changePath {
+			k.Step[3] = 1
+		}
+
+		// bip44 defaults to unhardened last step
+		leafhard = 0
 		if *g.verbose {
 			outString += fmt.Sprintf(
 				"Using BIP44 standard derivation path m/44'/0'/0'/0/k'\n")

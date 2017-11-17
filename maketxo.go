@@ -38,8 +38,9 @@ func (g *GDsession) extractmany() error {
 	return g.output(outstring)
 }
 
-// extract takes in a hex-encoded transaction, and returns a portxo.
+// extract takes in hex-encoded transactions, and returns a portxos.
 // or if it's a listunspent, then make a bunch of portxos
+// really "extractmany" is extractunspent"
 func (g *GDsession) extractfromtx() error {
 	if *g.inFileName == "" {
 		return fmt.Errorf("extract needs input file (-in)")
@@ -48,15 +49,14 @@ func (g *GDsession) extractfromtx() error {
 	tx := wire.NewMsgTx()
 	u := new(portxo.PorTxo)
 
-	fileslice, err := g.inputHex()
-	if err != nil {
-		return err
+	fileslice := g.inputHex()
+	if len(fileslice) == 0 {
+		return fmt.Errorf("no hex in input file")
 	}
 
 	// make buffer
-	txbuf := bytes.NewBuffer(fileslice)
-
-	err = tx.Deserialize(txbuf)
+	txbuf := bytes.NewBuffer(fileslice[0])
+	err := tx.Deserialize(txbuf)
 	if err != nil {
 		return err
 	}

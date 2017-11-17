@@ -4,11 +4,14 @@ import (
 	"bytes"
 	"fmt"
 
+	"github.com/adiabat/bech32"
 	"github.com/adiabat/btcd/btcec"
 	"github.com/adiabat/btcd/chaincfg"
 	"github.com/adiabat/btcd/txscript"
 	"github.com/adiabat/btcd/wire"
 	"github.com/adiabat/btcutil"
+	"github.com/adiabat/btcutil/base58"
+	"github.com/mit-dci/lit/lnutil"
 	"github.com/mit-dci/lit/portxo"
 )
 
@@ -30,12 +33,13 @@ func (g *GDsession) move() error {
 		return err
 	}
 
-	adr, err := btcutil.DecodeAddress(*g.destAdr, g.NetParams)
+	// ignore what network it's for
+	outScript, err := AdrStringToOutscript(*g.destAdr)
 	if err != nil {
 		return err
 	}
 
-	tx, err := SendOne(*txo, adr, *g.fee, g.NetParams)
+	tx, err := SendOne(*txo, outScript, *g.fee, g.NetParams)
 	if err != nil {
 		return err
 	}
@@ -51,8 +55,40 @@ func (g *GDsession) move() error {
 	return g.output(outString)
 }
 
+// AdrStringToOutscript converts an address string into an output script byte slice
+// note that this ignores the prefix! Be careful not to mix networks.
+// currently only works for testnet legacy addresses
+func AdrStringToOutscript(adr string) ([]byte, error) {
+	var err error
+	var outScript []byte
+
+	// use HRP to determine network / wallet to use
+	outScript, err = bech32.SegWitAddressDecode(adr)
+	if err != nil { // valid bech32 string
+		// try for base58 address
+		// btcutil addresses don't really work as they won't tell you the
+		// network; you have to tell THEM the network, which defeats the point
+		// of having an address.  default to testnet only here
+
+		// could work on adding more old-style addresses; for now use new bech32
+		// addresses for multi-wallet / segwit sends.
+
+		// ignore netID here
+		decoded, _, err := base58.CheckDecode(adr)
+		if err != nil {
+			return nil, err
+		}
+
+		outScript, err = lnutil.PayToPubKeyHashScript(decoded)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return outScript, nil
+}
+
 // SendOne moves one utxo to a new address, returning the transaction
-func SendOne(u portxo.PorTxo, adr btcutil.Address,
+func SendOne(u portxo.PorTxo, outScript []byte,
 	feeRate int64, param *chaincfg.Params) (*wire.MsgTx, error) {
 
 	// estimate tx size at 200 bytes
@@ -61,12 +97,8 @@ func SendOne(u portxo.PorTxo, adr btcutil.Address,
 	sendAmt := u.Value - fee
 	tx := wire.NewMsgTx() // make new tx
 	// add single output
-	outAdrScript, err := txscript.PayToAddrScript(adr)
-	if err != nil {
-		return nil, err
-	}
 	// make user specified txout and add to tx
-	txout := wire.NewTxOut(sendAmt, outAdrScript)
+	txout := wire.NewTxOut(sendAmt, outScript)
 	tx.AddTxOut(txout)
 	tx.AddTxIn(wire.NewTxIn(&u.Op, nil, nil))
 	//	tx.AddTxIn(wire.NewTxIn(&u.Op, nil))

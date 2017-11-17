@@ -95,7 +95,8 @@ type GDsession struct {
 	changePath *bool // use change addresses in derivation path
 
 	mainArg *bool // flag to set mainnet
-	bchArg  *bool // flag to set BCHnet
+
+	btgArg, bchArg, regArg *bool // flags for btg, bch, regtest
 
 	// defaults to testnet, not mainnet.  not reccommended for mainnet yet.
 	NetParams *chaincfg.Params
@@ -129,9 +130,10 @@ func (g *GDsession) setFlags(fset *flag.FlagSet) {
 
 	g.mainArg = fset.Bool("main", false, "use mainnet (not testnet3)")
 	g.bchArg = fset.Bool("bch", false, "use bch network")
+	g.btgArg = fset.Bool("btg", false, "use btg network")
+	g.regArg = fset.Bool("reg", false, "use regtest network")
 	g.bip44 = fset.Bool("b44", false, "use bip44 key derivation (default m/0'/0'/k')")
 	g.changePath = fset.Bool("change", false, "make change addresses/keys for bip44")
-
 }
 
 func (g *GDsession) prompt(pr string) ([]byte, error) {
@@ -189,8 +191,14 @@ func (g *GDsession) inputText() (string, error) {
 func (g *GDsession) LoadFiles() error {
 
 	// set network (can't do this in setFlags, needs to be after Parse() )
-	if *g.mainArg || *g.bchArg {
+	if *g.mainArg {
 		g.NetParams = &chaincfg.MainNetParams
+	} else if *g.bchArg {
+		g.NetParams = &chaincfg.BCHNetParams
+	} else if *g.btgArg {
+		g.NetParams = &chaincfg.BTGNetParams
+	} else if *g.regArg {
+		g.NetParams = &chaincfg.RegressionNetParams
 	} else {
 		g.NetParams = &chaincfg.TestNet3Params
 	}

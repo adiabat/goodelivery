@@ -75,8 +75,10 @@ func (g *GDsession) extractfromtx() error {
 		return err
 	}
 
-	// assume PKH for now... detect based on pkScript later
-	u.Mode = portxo.TxoP2PKHComp
+	// can't assume much from pkScript
+	u.Mode = portxo.TxoUnknownMode
+
+	//	u.Mode = portxo.TxoP2PKHComp
 
 	if *g.verbose {
 		fmt.Printf("%s\n", u.String())

@@ -151,8 +151,9 @@ func SendOne(u portxo.PorTxo, outScript []byte,
 			return nil, err
 		}
 	} else {
+		compressed := u.Mode&portxo.FlagTxoCompressed != 0
 		sigScript, err = txscript.SignatureScript(
-			tx, 0, prevScript, txscript.SigHashAll, priv, true)
+			tx, 0, prevScript, txscript.SigHashAll, priv, compressed)
 		if err != nil {
 			return nil, err
 		}

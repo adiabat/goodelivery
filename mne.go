@@ -203,6 +203,7 @@ func (g *GDsession) PrintHDKeys(
 		}
 
 		if showWIF {
+			// always use compressed public keys
 			wif, err := btcutil.NewWIF(priv, g.NetParams, true)
 			if err != nil {
 				return "", err

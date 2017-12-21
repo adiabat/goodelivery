@@ -93,6 +93,7 @@ type GDsession struct {
 
 	bip44      *bool // bip44 derivation paths (defaults to core's m/0'/0'/k')
 	changePath *bool // use change addresses in derivation path
+	segwit     *bool // use bech32 segwit addresses
 
 	mainArg *bool // flag to set mainnet
 
@@ -134,6 +135,7 @@ func (g *GDsession) setFlags(fset *flag.FlagSet) {
 	g.regArg = fset.Bool("reg", false, "use regtest network")
 	g.bip44 = fset.Bool("b44", false, "use bip44 key derivation (default m/0'/0'/k')")
 	g.changePath = fset.Bool("change", false, "make change addresses/keys for bip44")
+	g.segwit = fset.Bool("sw", false, "use bech32 segwit addresses")
 }
 
 func (g *GDsession) prompt(pr string) ([]byte, error) {

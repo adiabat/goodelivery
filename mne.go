@@ -9,6 +9,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/adiabat/bech32"
 	"github.com/adiabat/btcutil"
 	"github.com/adiabat/btcutil/hdkeychain"
 	"github.com/mit-dci/lit/coinparam"
@@ -194,12 +195,25 @@ func (g *GDsession) PrintHDKeys(
 
 		if !showWIF || *g.verbose {
 
+			var adr string
+			// get 20 byte pubkey hash
 			pkHash := btcutil.Hash160(priv.PubKey().SerializeCompressed())
-			adr, err := btcutil.NewAddressPubKeyHash(pkHash, g.NetParams)
-			if err != nil {
-				return "", err
+
+			if *g.segwit {
+				// convert 20-byte PKH to a bech32 segwit v0 address
+				adr, err = bech32.SegWitV0Encode(g.NetParams.Bech32Prefix, pkHash[:])
+				if err != nil {
+					return "", err
+				}
+			} else {
+				// old base58 address
+				b58adr, err := btcutil.NewAddressPubKeyHash(pkHash, g.NetParams)
+				if err != nil {
+					return "", err
+				}
+				adr = b58adr.String()
 			}
-			outString += fmt.Sprintf("%s", adr.String())
+			outString += fmt.Sprintf("%s", adr)
 		}
 
 		if showWIF {

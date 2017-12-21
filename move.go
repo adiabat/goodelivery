@@ -146,7 +146,7 @@ func SendOne(u portxo.PorTxo, outScript []byte,
 
 		// generate sig.
 		sigScript, err = txscript.BCHSignatureScript(
-			tx, hCache, 0, u.Value, u.PkScript, hashType, priv, true)
+			tx, hCache, 0, u.Value, u.PkScript, hashType, priv, false)
 		if err != nil {
 			return nil, err
 		}

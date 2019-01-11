@@ -123,7 +123,7 @@ func (g *GDsession) new39() error {
 //TODO add derivation paths for different wallets.
 // Currently uses Core: m/0'/0'/k'
 // Hive / Breadwallet: m/0'/0/k ?
-// Mycelium / BIP44 standard: m/44'/0'/0'/0/k
+// Electrum import / Mycelium / BIP44 standard: m/44'/0'/0'/0/k
 
 func (g *GDsession) PrintHDKeys(
 	root *hdkeychain.ExtendedKey, showWIF bool) (string, error) {
@@ -157,7 +157,7 @@ func (g *GDsession) PrintHDKeys(
 		leafhard = 0
 		if *g.verbose {
 			outString += fmt.Sprintf(
-				"Using BIP44 standard derivation path m/44'/0'/0'/0/k'\n")
+				"Using BIP44 standard derivation path m/44'/0'/0'/0/k\n")
 		}
 
 	} else { // core m/0'/0'/k' derivation

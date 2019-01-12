@@ -10,8 +10,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/adiabat/btcd/chaincfg"
 	"github.com/howeyc/gopass"
+	"github.com/mit-dci/lit/btcutil/chaincfg"
 )
 
 /* goodelivery --

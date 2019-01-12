@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/adiabat/btcd/btcec"
-	"github.com/adiabat/btcd/chaincfg"
-	"github.com/adiabat/btcd/chaincfg/chainhash"
-	"github.com/adiabat/btcutil"
-	"github.com/adiabat/btcutil/base58"
+	"github.com/mit-dci/lit/btcutil"
+	"github.com/mit-dci/lit/btcutil/base58"
+	"github.com/mit-dci/lit/btcutil/chaincfg"
+	"github.com/mit-dci/lit/btcutil/chaincfg/chainhash"
+	"github.com/mit-dci/lit/crypto/koblitz"
 	"golang.org/x/crypto/scrypt"
 )
 
@@ -51,7 +51,7 @@ func Validate(bstring string) error {
 // Encrypt38 takes a private key and passphrase, and returns the encoded
 // and encrypted private key.
 // Only does non-EC, because it makes more sense.
-func Encrypt38(k *btcec.PrivateKey,
+func Encrypt38(k *koblitz.PrivateKey,
 	compr bool, pass []byte, param *chaincfg.Params) (string, error) {
 
 	bkey := new(BIP38Key)
@@ -102,7 +102,7 @@ func Encrypt38(k *btcec.PrivateKey,
 // Decrypt38 takes an encrypted private key and passphrase, and returns the
 // decrypted private key.
 func Decrypt38(decoded, pass []byte,
-	param *chaincfg.Params) (*btcec.PrivateKey, bool, error) {
+	param *chaincfg.Params) (*koblitz.PrivateKey, bool, error) {
 
 	var compr bool
 	var privArr [32]byte
@@ -119,7 +119,7 @@ func Decrypt38(decoded, pass []byte,
 		privArr = decryptNoEC(bkey, pass)
 	}
 
-	priv, pub := btcec.PrivKeyFromBytes(btcec.S256(), privArr[:])
+	priv, pub := koblitz.PrivKeyFromBytes(koblitz.S256(), privArr[:])
 
 	// we have the private key, but it could be wrong.
 	// check the address and see if this corresponds to the 4 byte
@@ -221,9 +221,9 @@ func decryptEC(bk *BIP38Key, pass []byte) [32]byte {
 // turns a private key (bytes) into a serialized public key (bytes)
 func privToPubBytes(b []byte) []byte {
 	// make a new pubkey
-	k := new(btcec.PublicKey)
+	k := new(koblitz.PublicKey)
 	// b is the private key
-	k.X, k.Y = btcec.S256().ScalarBaseMult(b)
+	k.X, k.Y = koblitz.S256().ScalarBaseMult(b)
 	// return compressed
 	return k.SerializeCompressed()
 }
@@ -236,7 +236,7 @@ func bigMult(a, b []byte) []byte {
 	// a = a*b
 	bigA.Mul(bigA, bigB)
 	// a = a mod n
-	bigA.Mod(bigA, btcec.S256().N)
+	bigA.Mod(bigA, koblitz.S256().N)
 	return bigA.Bytes()
 }
 

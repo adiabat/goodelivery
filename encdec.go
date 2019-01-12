@@ -3,9 +3,9 @@ package main
 import (
 	"fmt"
 
-	"github.com/adiabat/btcutil"
-	"github.com/adiabat/btcutil/base58"
 	"github.com/adiabat/goodelivery/bip38"
+	"github.com/mit-dci/lit/btcutil"
+	"github.com/mit-dci/lit/btcutil/base58"
 )
 
 // dec38 decrypts a BIP38 key into WIF

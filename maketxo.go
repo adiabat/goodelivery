@@ -4,9 +4,9 @@ import (
 	"bytes"
 	"fmt"
 
-	"github.com/adiabat/btcd/wire"
 	"github.com/adiabat/goodelivery/extract"
 	"github.com/mit-dci/lit/portxo"
+	"github.com/mit-dci/lit/wire"
 )
 
 func (g *GDsession) extractmany() error {

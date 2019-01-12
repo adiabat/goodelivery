@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/adiabat/btcutil"
 	"github.com/adiabat/goodelivery/extract"
+	"github.com/mit-dci/lit/btcutil"
 	"github.com/mit-dci/lit/portxo"
 )
 

@@ -5,14 +5,14 @@ import (
 	"fmt"
 
 	"github.com/adiabat/bech32"
-	"github.com/adiabat/btcd/btcec"
-	"github.com/adiabat/btcd/chaincfg"
-	"github.com/adiabat/btcd/txscript"
-	"github.com/adiabat/btcd/wire"
-	"github.com/adiabat/btcutil"
-	"github.com/adiabat/btcutil/base58"
+	"github.com/mit-dci/lit/btcutil"
+	"github.com/mit-dci/lit/btcutil/base58"
+	"github.com/mit-dci/lit/btcutil/chaincfg"
+	"github.com/mit-dci/lit/btcutil/txscript"
+	"github.com/mit-dci/lit/crypto/koblitz"
 	"github.com/mit-dci/lit/lnutil"
 	"github.com/mit-dci/lit/portxo"
+	"github.com/mit-dci/lit/wire"
 )
 
 func (g *GDsession) move() error {
@@ -111,7 +111,7 @@ func SendOne(u portxo.PorTxo, outScript []byte,
 		return nil, fmt.Errorf("error: porTxo has empty private key field")
 	}
 
-	priv, _ := btcec.PrivKeyFromBytes(btcec.S256(), u.PrivKey[:])
+	priv, _ := koblitz.PrivKeyFromBytes(koblitz.S256(), u.PrivKey[:])
 
 	if priv == nil {
 		return nil, fmt.Errorf("SendCoins: privkey error")

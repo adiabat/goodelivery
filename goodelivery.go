@@ -133,7 +133,7 @@ func (g *GDsession) setFlags(fset *flag.FlagSet) {
 	g.bchArg = fset.Bool("bch", false, "use bch network")
 	g.btgArg = fset.Bool("btg", false, "use btg network")
 	g.regArg = fset.Bool("reg", false, "use regtest network")
-	g.bip44 = fset.Bool("b44", false, "use bip44 key derivation (default m/0'/0'/k')")
+	g.bip44 = fset.Bool("b44", true, "use bip44 key derivation (default m/0'/0'/k')")
 	g.changePath = fset.Bool("change", false, "make change addresses/keys for bip44")
 	g.segwit = fset.Bool("sw", false, "use bech32 segwit addresses")
 }

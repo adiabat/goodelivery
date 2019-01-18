@@ -33,7 +33,7 @@ commands:
 	parse a BIP39 mnemonic phrase, returning WIF keys and addresses
 
 
-(note, BIP38 not reccomended for new usage; use BIP39 compatible mne instead)
+(note, BIP38 not recommended for new usage; use BIP39 compatible mne instead)
 [BIP38]
 	dec /
 	decrypt BIP38 encrypted private key, returning WIF key
@@ -50,7 +50,7 @@ commands:
 
 [signing]
 	move /
-	create signed trnasactions spending from one or more keyed portxos
+	create signed transactions spending from one or more keyed portxos
 	as this is an offline tool, the transaction is saved to disk and can be
 	exported / printed
 
@@ -99,12 +99,12 @@ type GDsession struct {
 
 	btgArg, bchArg, regArg *bool // flags for btg, bch, regtest
 
-	// defaults to testnet, not mainnet.  not reccommended for mainnet yet.
+	// defaults to testnet, not mainnet.  not recommended for mainnet yet.
 	NetParams *chaincfg.Params
 }
 
 // setFlags gets all the command line flags into the session struct.
-// kindof annoying that it's all poiters though.
+// kindof annoying that it's all pointers though.
 func (g *GDsession) setFlags(fset *flag.FlagSet) {
 	g.inFileName = fset.String("in", "", "input file name")
 	g.outFileName = fset.String("out", "", "output file name")

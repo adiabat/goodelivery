@@ -11,7 +11,7 @@ import (
 	"strings"
 
 	"github.com/howeyc/gopass"
-	"github.com/mit-dci/lit/btcutil/chaincfg"
+	"github.com/mit-dci/lit/coinparam"
 )
 
 /* goodelivery --
@@ -100,7 +100,7 @@ type GDsession struct {
 	btgArg, bchArg, regArg *bool // flags for btg, bch, regtest
 
 	// defaults to testnet, not mainnet.  not reccommended for mainnet yet.
-	NetParams *chaincfg.Params
+	NetParams *coinparam.Params
 }
 
 // setFlags gets all the command line flags into the session struct.
@@ -194,15 +194,15 @@ func (g *GDsession) LoadFiles() error {
 
 	// set network (can't do this in setFlags, needs to be after Parse() )
 	if *g.mainArg {
-		g.NetParams = &chaincfg.MainNetParams
+		g.NetParams = &coinparam.BitcoinParams
 	} else if *g.bchArg {
-		g.NetParams = &chaincfg.BCHNetParams
+		//		g.NetParams = &coinparam.BCHNetParams
 	} else if *g.btgArg {
-		g.NetParams = &chaincfg.BTGNetParams
+		//		g.NetParams = &coinparam.BTGNetParams
 	} else if *g.regArg {
-		g.NetParams = &chaincfg.RegressionNetParams
+		g.NetParams = &coinparam.RegressionNetParams
 	} else {
-		g.NetParams = &chaincfg.TestNet3Params
+		g.NetParams = &coinparam.TestNet3Params
 	}
 
 	if *g.wiffile != "" {

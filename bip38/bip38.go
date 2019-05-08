@@ -7,8 +7,8 @@ import (
 
 	"github.com/mit-dci/lit/btcutil"
 	"github.com/mit-dci/lit/btcutil/base58"
-	"github.com/mit-dci/lit/btcutil/chaincfg"
 	"github.com/mit-dci/lit/btcutil/chaincfg/chainhash"
+	"github.com/mit-dci/lit/coinparam"
 	"github.com/mit-dci/lit/crypto/koblitz"
 	"golang.org/x/crypto/scrypt"
 )
@@ -52,7 +52,7 @@ func Validate(bstring string) error {
 // and encrypted private key.
 // Only does non-EC, because it makes more sense.
 func Encrypt38(k *koblitz.PrivateKey,
-	compr bool, pass []byte, param *chaincfg.Params) (string, error) {
+	compr bool, pass []byte, param *coinparam.Params) (string, error) {
 
 	bkey := new(BIP38Key)
 	var pubBytes []byte
@@ -102,7 +102,7 @@ func Encrypt38(k *koblitz.PrivateKey,
 // Decrypt38 takes an encrypted private key and passphrase, and returns the
 // decrypted private key.
 func Decrypt38(decoded, pass []byte,
-	param *chaincfg.Params) (*koblitz.PrivateKey, bool, error) {
+	param *coinparam.Params) (*koblitz.PrivateKey, bool, error) {
 
 	var compr bool
 	var privArr [32]byte

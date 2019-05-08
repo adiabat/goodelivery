@@ -7,8 +7,8 @@ import (
 	"github.com/adiabat/bech32"
 	"github.com/mit-dci/lit/btcutil"
 	"github.com/mit-dci/lit/btcutil/base58"
-	"github.com/mit-dci/lit/btcutil/chaincfg"
 	"github.com/mit-dci/lit/btcutil/txscript"
+	"github.com/mit-dci/lit/coinparam"
 	"github.com/mit-dci/lit/crypto/koblitz"
 	"github.com/mit-dci/lit/lnutil"
 	"github.com/mit-dci/lit/portxo"
@@ -89,7 +89,7 @@ func AdrStringToOutscript(adr string) ([]byte, error) {
 
 // SendOne moves one utxo to a new address, returning the transaction
 func SendOne(u portxo.PorTxo, outScript []byte,
-	feeRate int64, param *chaincfg.Params) (*wire.MsgTx, error) {
+	feeRate int64, param *coinparam.Params) (*wire.MsgTx, error) {
 
 	// estimate tx size at 200 bytes
 	fee := 200 * feeRate

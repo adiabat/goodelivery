@@ -189,7 +189,6 @@ func (g *GDsession) PrintHDKeys(
 		}
 
 		if *g.verbose {
-
 			outString += fmt.Sprintf("%s - ", k.String())
 		}
 

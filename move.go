@@ -117,12 +117,24 @@ func SendOne(u portxo.PorTxo, outScript []byte,
 		return nil, fmt.Errorf("SendCoins: privkey error")
 	}
 
+	compressed := u.Mode&portxo.FlagTxoCompressed != 0
+
 	// sign into stash
 	prevAdr, err := btcutil.NewAddressPubKeyHash(
 		btcutil.Hash160(priv.PubKey().SerializeCompressed()), param)
 	if err != nil {
 		return nil, err
 	}
+
+	if !compressed {
+		prevAdr, err = btcutil.NewAddressPubKeyHash(
+			btcutil.Hash160(priv.PubKey().SerializeUncompressed()), param)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	fmt.Printf("got adr %s from wif\n", prevAdr.String())
 
 	prevScript, err := txscript.PayToAddrScript(prevAdr)
 	if err != nil {
@@ -151,7 +163,7 @@ func SendOne(u portxo.PorTxo, outScript []byte,
 			return nil, err
 		}
 	} else {
-		compressed := u.Mode&portxo.FlagTxoCompressed != 0
+
 		sigScript, err = txscript.SignatureScript(
 			tx, 0, prevScript, txscript.SigHashAll, priv, compressed)
 		if err != nil {

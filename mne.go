@@ -136,6 +136,25 @@ func (g *GDsession) PrintHDKeys(
 	hard := uint32(1 << 31) // derivation hardening bit
 	leafhard := hard        // whether to harden last step
 
+	if showWIF {
+		// generate WIF for bitcoin core wallet sethdseed
+		// it's m/0'/0' which is made up but should work fine and
+		// might be found with a short search if someone can't remember the path
+		k.Depth = 2
+		k.Step[0] = 0 | hard
+		k.Step[1] = 0 | hard
+		priv, err := k.DerivePrivateKey(root)
+		if err != nil {
+			return "", err
+		}
+		wif, err := btcutil.NewWIF(priv, g.NetParams, true)
+		if err != nil {
+			return "", err
+		}
+		outString += fmt.Sprintf(
+			"sethdseed m/0'/0': %s\n", wif.String())
+	}
+
 	if *g.bip44 { // bip44 derivation
 		k.Depth = 5
 		k.Step[0] = 44 | hard
